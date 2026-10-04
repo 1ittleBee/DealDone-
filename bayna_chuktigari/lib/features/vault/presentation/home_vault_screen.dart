@@ -287,39 +287,19 @@ class _HomeVaultScreenState extends State<HomeVaultScreen> {
                           color: Color(AppColors.accentHighlightInt),
                         ),
                       ),
-                      ElevatedButton.icon(
-                        key: Key('view_pdf_btn_${record.documentId}'),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (c) => PdfPreviewScreen(
-                                record: record,
-                                template: template,
-                                vaultRepository: widget.vaultRepository,
-                              ),
+                      const Row(
+                        children: [
+                          Text(
+                            AppStringsBn.receiptViewBtn,
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(AppColors.accentInt),
                             ),
-                          );
-                        },
-                        icon: const Icon(Icons.picture_as_pdf, size: 15),
-                        label: const Text(
-                          AppStringsBn.viewPdfBtn,
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontFamily,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(AppColors.accentInt),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                          ),
-                        ),
+                          Icon(Icons.chevron_right, size: 16, color: Color(AppColors.accentInt)),
+                        ],
                       ),
                     ],
                   ),

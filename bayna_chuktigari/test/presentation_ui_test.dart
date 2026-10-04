@@ -5,6 +5,7 @@ import 'package:bayna_chuktigari/features/templates/presentation/template_catalo
 import 'package:bayna_chuktigari/features/vault/domain/agreement_record.dart';
 import 'package:bayna_chuktigari/features/vault/domain/vault_repository.dart';
 import 'package:bayna_chuktigari/features/vault/presentation/home_vault_screen.dart';
+import 'package:bayna_chuktigari/features/pdf_generator/presentation/contract_pdf_viewer_screen.dart';
 import 'package:bayna_chuktigari/main.dart';
 
 void main() {
@@ -46,19 +47,28 @@ void main() {
       expect(find.text('পুরাতন গাড়ি / পণ্য বিক্রয় চুক্তি'), findsOneWidget);
       expect(find.text('মোঃ আব্দুল করিম ↔ তানভীর আহমেদ'), findsOneWidget);
       expect(find.text('টাকা: ৳145000'), findsOneWidget);
-      expect(find.text(AppStringsBn.viewPdfBtn), findsOneWidget);
+      expect(find.text(AppStringsBn.receiptViewBtn), findsOneWidget);
     });
 
-    testWidgets('Tapping view PDF button opens PdfPreviewScreen', (tester) async {
+    testWidgets('Tapping receipt opens preview and View as PDF opens PDF viewer', (tester) async {
       await tester.pumpWidget(BaynaChuktiApp(vaultRepository: mockVault));
       await tester.pumpAndSettle();
 
-      final pdfBtn = find.text(AppStringsBn.viewPdfBtn);
-      expect(pdfBtn, findsOneWidget);
-      await tester.tap(pdfBtn);
+      final receiptBtn = find.text(AppStringsBn.receiptViewBtn);
+      expect(receiptBtn, findsOneWidget);
+      await tester.tap(receiptBtn);
       await tester.pumpAndSettle();
 
       expect(find.text('ডিজিটাল চুক্তিপত্র ও রসিদ'), findsOneWidget);
+      final pdfViewBtn = find.text(AppStringsBn.viewAsPdfBtn);
+      expect(pdfViewBtn, findsOneWidget);
+
+      await tester.ensureVisible(pdfViewBtn);
+      await tester.tap(pdfViewBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ContractPdfViewerScreen), findsOneWidget);
+      expect(find.text('A4 ভেক্টর ডকুমেন্ট • জুম করতে দুই আঙুল ব্যবহার করুন'), findsOneWidget);
     });
 
     testWidgets('Tapping FAB opens TemplateCatalogModal with templates', (tester) async {

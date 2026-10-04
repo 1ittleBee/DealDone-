@@ -8,6 +8,7 @@ import '../../share/domain/whatsapp_share_service.dart';
 import '../../templates/domain/template_entity.dart';
 import '../../vault/domain/agreement_record.dart';
 import '../../vault/domain/vault_repository.dart';
+import 'contract_pdf_viewer_screen.dart';
 
 /// PDF Preview and 1-Tap Share Screen
 class PdfPreviewScreen extends StatelessWidget {
@@ -50,12 +51,29 @@ class PdfPreviewScreen extends StatelessWidget {
     }
   }
 
+  void _openPdfViewer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (c) => ContractPdfViewerScreen(
+          record: record,
+          template: template,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ডিজিটাল চুক্তিপত্র ও রসিদ'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            tooltip: AppStringsBn.viewAsPdfBtn,
+            onPressed: () => _openPdfViewer(context),
+          ),
           IconButton(
             icon: const Icon(Icons.share_outlined),
             onPressed: () => _shareViaWhatsApp(context),
@@ -285,6 +303,30 @@ class PdfPreviewScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 20),
+
+            // View as PDF Button
+            ElevatedButton.icon(
+              key: const Key('view_as_pdf_btn'),
+              onPressed: () => _openPdfViewer(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(AppColors.accentInt),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                ),
+              ),
+              icon: const Icon(Icons.picture_as_pdf, size: 20),
+              label: const Text(
+                AppStringsBn.viewAsPdfBtn,
+                style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
 
             // WhatsApp 1-Tap Share Button
             ElevatedButton.icon(
