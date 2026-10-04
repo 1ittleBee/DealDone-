@@ -8,6 +8,9 @@ import '../../share/domain/whatsapp_share_service.dart';
 import '../../templates/domain/template_entity.dart';
 import '../../vault/domain/agreement_record.dart';
 import '../../vault/domain/vault_repository.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import '../../qr_scanner/domain/contract_qr_codec.dart';
+import '../domain/sha256_digest_service.dart';
 import 'contract_pdf_viewer_screen.dart';
 
 /// PDF Preview and 1-Tap Share Screen
@@ -239,10 +242,27 @@ class PdfPreviewScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                             border: Border.all(color: const Color(AppColors.borderStrongInt)),
                           ),
-                          child: const Icon(
-                            Icons.qr_code_2,
-                            size: 40,
-                            color: Color(AppColors.inkPrimaryInt),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppTheme.radiusSm - 1),
+                            child: QrImageView(
+                              data: ContractQrCodeCodec.encode(
+                                payload: CanonicalAgreementPayload(
+                                  documentId: record.documentId,
+                                  templateId: record.templateId,
+                                  timestampIso: record.createdAt.toIso8601String(),
+                                  firstPartyName: record.firstPartyName,
+                                  firstPartyMobile: record.firstPartyMobile,
+                                  secondPartyName: record.secondPartyName,
+                                  secondPartyMobile: record.secondPartyMobile,
+                                  totalAmount: record.totalAmount,
+                                  dueAmount: record.dueAmount,
+                                ),
+                                titleBn: record.titleBn,
+                              ),
+                              version: QrVersions.auto,
+                              size: 48,
+                              padding: const EdgeInsets.all(2),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),

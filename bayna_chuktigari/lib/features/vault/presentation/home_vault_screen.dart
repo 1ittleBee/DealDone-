@@ -9,6 +9,7 @@ import '../../templates/domain/template_entity.dart';
 import '../../templates/presentation/template_catalog_modal.dart';
 import '../domain/agreement_record.dart';
 import '../domain/vault_repository.dart';
+import '../../qr_scanner/presentation/contract_qr_scanner_screen.dart';
 
 /// Main Home / Vault Screen
 class HomeVaultScreen extends StatefulWidget {
@@ -90,6 +91,23 @@ class _HomeVaultScreenState extends State<HomeVaultScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            key: const Key('home_qr_scanner_btn'),
+            icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+            tooltip: 'চুক্তিপত্র QR স্ক্যান ও যাচাই করুন',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (ctx) => ContractQrScannerScreen(
+                    vaultRepository: widget.vaultRepository,
+                  ),
+                ),
+              ).then((_) => _loadAgreements());
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

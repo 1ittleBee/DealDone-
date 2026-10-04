@@ -7,6 +7,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../share/domain/whatsapp_share_service.dart';
 import '../../templates/domain/template_entity.dart';
 import '../../vault/domain/agreement_record.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import '../../qr_scanner/domain/contract_qr_codec.dart';
+import '../domain/sha256_digest_service.dart';
 
 /// Full-Page PDF Document Viewer Screen with pinch-to-zoom and authentic A4 layout.
 class ContractPdfViewerScreen extends StatefulWidget {
@@ -289,8 +292,27 @@ class _ContractPdfViewerScreenState extends State<ContractPdfViewerScreen> {
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(color: const Color(AppColors.borderHairlineInt)),
                                 ),
-                                child: const Center(
-                                  child: Icon(Icons.qr_code_2, size: 36, color: Color(AppColors.accentInt)),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(3),
+                                  child: QrImageView(
+                                    data: ContractQrCodeCodec.encode(
+                                      payload: CanonicalAgreementPayload(
+                                        documentId: record.documentId,
+                                        templateId: record.templateId,
+                                        timestampIso: record.createdAt.toIso8601String(),
+                                        firstPartyName: record.firstPartyName,
+                                        firstPartyMobile: record.firstPartyMobile,
+                                        secondPartyName: record.secondPartyName,
+                                        secondPartyMobile: record.secondPartyMobile,
+                                        totalAmount: record.totalAmount,
+                                        dueAmount: record.dueAmount,
+                                      ),
+                                      titleBn: record.titleBn,
+                                    ),
+                                    version: QrVersions.auto,
+                                    size: 42,
+                                    padding: const EdgeInsets.all(1),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10),
