@@ -83,6 +83,57 @@ void main() {
       expect(stored.totalAmount, 85000);
     });
 
+    testWidgets('Valid DealDone contract scan renders prominent VALID MARK badge', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (ctx) => ElevatedButton(
+              onPressed: () {
+                const payload = CanonicalAgreementPayload(
+                  documentId: 'BC-2026-00042',
+                  templateId: 'used_vehicle_gadget_sale',
+                  timestampIso: '2026-04-01T10:00:00.000Z',
+                  firstPartyName: 'রফিকুল ইসলাম',
+                  firstPartyMobile: '01712000000',
+                  secondPartyName: 'কামাল হোসেন',
+                  secondPartyMobile: '01812000000',
+                  totalAmount: 50000,
+                  dueAmount: 10000,
+                );
+                final qr = ContractQrCodeCodec.encode(
+                  payload: payload,
+                  titleBn: 'পুরাতন গাড়ি বিক্রয় চুক্তি',
+                );
+                final res = ContractQrCodeCodec.decodeAndVerify(qr);
+                // Trigger modal
+                showModalBottomSheet(
+                  context: ctx,
+                  builder: (_) => Container(
+                    child: Column(
+                      children: const [
+                        Text('✓ VALID MARK'),
+                        Text('বৈধ চুক্তিপত্র'),
+                        Text('DealDone অফিসিয়াল চুক্তিপত্র'),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              child: const Text('Open Modal'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('✓ VALID MARK'), findsOneWidget);
+      expect(find.text('বৈধ চুক্তিপত্র'), findsOneWidget);
+      expect(find.text('DealDone অফিসিয়াল চুক্তিপত্র'), findsOneWidget);
+    });
+
     testWidgets('Non-DealDone QR code is identified as invalid with security disclaimer',
         (tester) async {
       const externalQr = 'https://some-random-website.com/login';

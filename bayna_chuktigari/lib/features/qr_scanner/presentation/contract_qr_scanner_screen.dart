@@ -201,54 +201,109 @@ class _ContractQrScannerScreenState extends State<ContractQrScannerScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Verified Header
-              Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
+              // Official VALID MARK Banner
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                  border: Border.all(color: const Color(AppColors.successInt), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
                       color: const Color(AppColors.successInt).withOpacity(0.12),
-                      shape: BoxShape.circle,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                    child: const Icon(
-                      Icons.verified_outlined,
-                      color: Color(AppColors.successInt),
-                      size: 30,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'বৈধ ও অপরিবর্তিত চুক্তিপত্র',
-                          style: TextStyle(
-                            fontFamily: AppTheme.fontFamily,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Color(AppColors.successInt),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // Official Valid Mark Stamp Emblem
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: const Color(AppColors.successInt),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(AppColors.successInt).withOpacity(0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.verified,
+                          color: Colors.white,
+                          size: 34,
                         ),
-                        Text(
-                          'স্মারক নং: ${result.documentId}',
-                          style: const TextStyle(
-                            fontFamily: AppTheme.fontFamily,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Color(AppColors.accentInt),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(AppColors.successInt),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  '✓ VALID MARK',
+                                  style: TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Text(
+                                'বৈধ চুক্তিপত্র',
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(AppColors.successInt),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'DealDone অফিসিয়াল চুক্তিপত্র',
+                            style: TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: Color(AppColors.inkPrimaryInt),
+                            ),
+                          ),
+                          Text(
+                            'স্মারক নং: ${result.documentId}',
+                            style: const TextStyle(
+                              fontFamily: AppTheme.fontFamily,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(AppColors.accentInt),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-              const SizedBox(height: 16),
-              const Divider(height: 1, color: Color(AppColors.borderHairlineInt)),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
               // Contract details card
               Container(
@@ -260,6 +315,33 @@ class _ContractQrScannerScreenState extends State<ContractQrScannerScreen> {
                 ),
                 child: Column(
                   children: [
+                    // Status Badge with Valid Mark
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(AppColors.successInt).withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                        border: Border.all(color: const Color(AppColors.successInt), width: 0.8),
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.check_circle, size: 16, color: Color(AppColors.successInt)),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'আইনি স্ট্যাটাস: এই চুক্তিপত্রটি ১০০% আসল ও অপরিবর্তিত (VALID)',
+                              style: TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Color(AppColors.successInt),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     _buildModalRow('চুক্তির শিরোনাম:', result.titleBn),
                     _buildModalRow('প্রথম পক্ষ:', '${result.firstPartyName} (${result.firstPartyMobile})'),
                     _buildModalRow('দ্বিতীয় পক্ষ:', '${result.secondPartyName} (${result.secondPartyMobile})'),
