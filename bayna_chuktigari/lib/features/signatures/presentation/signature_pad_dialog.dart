@@ -702,9 +702,15 @@ class _SignaturePainter extends CustomPainter {
 
     final paint = Paint()
       ..color = const Color(AppColors.inkPrimaryInt)
+      ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..strokeWidth = 3.5
+      ..isAntiAlias = true;
+
+    final dotPaint = Paint()
+      ..color = const Color(AppColors.inkPrimaryInt)
+      ..style = PaintingStyle.fill
       ..isAntiAlias = true;
 
     final path = Path();
@@ -737,7 +743,7 @@ class _SignaturePainter extends CustomPainter {
       if (points[i] != null &&
           (i == 0 || points[i - 1] == null) &&
           (i == points.length - 1 || points[i + 1] == null)) {
-        canvas.drawCircle(points[i]!, 2.5, paint);
+        canvas.drawCircle(points[i]!, 2.5, dotPaint);
       }
     }
   }
