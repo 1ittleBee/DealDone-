@@ -1,0 +1,117 @@
+import 'package:test/test.dart';
+import 'package:bayna_chuktigari/features/agreement_wizard/domain/party_details.dart';
+import 'package:bayna_chuktigari/features/signatures/domain/digital_signature.dart';
+import 'package:bayna_chuktigari/features/signatures/domain/tipshoi_capture.dart';
+
+void main() {
+  group('Story 4.2: Tipshoi (টিপসই) Physical Thumbprint Capture Tests', () {
+    test('TipshoiCapture preserves finger specifications and square 1:1 ratio', () {
+      final tipshoi = TipshoiCapture(
+        id: 'tip-1',
+        signerName: 'আনোয়ারা বেগম',
+        role: PartyRole.firstParty,
+        finger: ThumbprintFinger.leftThumb,
+        imagePath: '/storage/emulated/0/Bayna/tipshoi_1.jpg',
+        capturedAt: DateTime(2026, 9, 30),
+      );
+
+      expect(tipshoi.finger.titleBn, equals('বাম বৃদ্ধাঙ্গুলি'));
+      expect(tipshoi.aspectRatio, equals(1.0));
+      expect(tipshoi.imagePath, isNotEmpty);
+    });
+
+    test('PartyAttestation validates presence of either valid signature or physical tipshoi', () {
+      // 1. Unattested
+      final emptyAttestation = PartyAttestation(
+        role: PartyRole.firstParty,
+        partyName: 'করিম মিয়া',
+      );
+
+      expect(emptyAttestation.hasAttestation, isFalse);
+      expect(emptyAttestation.validate(), equals('স্বাক্ষর অথবা টিপসই প্রদান করুন'));
+
+      // 2. Attested via Tipshoi
+      final tipshoiAttested = PartyAttestation(
+        role: PartyRole.firstParty,
+        partyName: 'করিম মিয়া',
+        tipshoi: TipshoiCapture(
+          id: 'tip-2',
+          signerName: 'করিম মিয়া',
+          role: PartyRole.firstParty,
+          finger: ThumbprintFinger.rightThumb,
+          imagePath: '/path/thumb.png',
+          capturedAt: DateTime(2026, 9, 30),
+        ),
+      );
+
+      expect(tipshoiAttested.hasAttestation, isTrue);
+      expect(tipshoiAttested.validate(), isNull);
+
+      // 3. Attested via Digital Signature
+      final stroke = SignatureStroke(
+        points: List.generate(
+          16,
+          (i) => SignaturePoint(x: i.toDouble(), y: i.toDouble(), timestampMs: i),
+        ),
+      );
+      final sigAttested = PartyAttestation(
+        role: PartyRole.secondParty,
+        partyName: 'রহিম মোল্লা',
+        signature: DigitalSignature(
+          id: 'sig-valid',
+          signerName: 'রহিম মোল্লা',
+          role: PartyRole.secondParty,
+          strokes: [stroke],
+          signedAt: DateTime(2026, 9, 30),
+        ),
+      );
+
+      expect(sigAttested.hasAttestation, isTrue);
+      expect(sigAttested.validate(), isNull);
+
+      // 4. Invalid signature (< 15 points) without tipshoi
+      final invalidSigAttested = PartyAttestation(
+        role: PartyRole.firstParty,
+        partyName: 'করিম মিয়া',
+        signature: DigitalSignature(
+          id: 'sig-inv',
+          signerName: 'করিম মিয়া',
+          role: PartyRole.firstParty,
+          strokes: [
+            SignatureStroke(
+              points: [const SignaturePoint(x: 1, y: 1, timestampMs: 0)],
+            ),
+          ],
+          signedAt: DateTime(2026, 9, 30),
+        ),
+      );
+
+      expect(invalidSigAttested.hasAttestation, isFalse);
+    });
+
+    test('Serialization to/from JSON roundtrips cleanly for Tipshoi and PartyAttestation', () {
+      final attestation = PartyAttestation(
+        role: PartyRole.firstParty,
+        partyName: 'হাফেজ মো. ইউনুস',
+        tipshoi: TipshoiCapture(
+          id: 'tip-rt',
+          signerName: 'হাফেজ মো. ইউনুস',
+          role: PartyRole.firstParty,
+          finger: ThumbprintFinger.leftThumb,
+          imagePath: '/vault/signatures/tipshoi_yunus.jpg',
+          capturedAt: DateTime(2026, 9, 30, 10, 30),
+          base64Thumbnail: 'base64ThumbnailDataThumb',
+        ),
+      );
+
+      final json = attestation.toJson();
+      final restored = PartyAttestation.fromJson(json);
+
+      expect(restored.role, equals(PartyRole.firstParty));
+      expect(restored.partyName, equals('হাফেজ মো. ইউনুস'));
+      expect(restored.hasAttestation, isTrue);
+      expect(restored.tipshoi?.finger, equals(ThumbprintFinger.leftThumb));
+      expect(restored.tipshoi?.base64Thumbnail, equals('base64ThumbnailDataThumb'));
+    });
+  });
+}

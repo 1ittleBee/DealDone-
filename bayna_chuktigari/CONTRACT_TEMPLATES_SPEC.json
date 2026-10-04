@@ -1,0 +1,118 @@
+{
+  "version": "1.0.0",
+  "app_name": "DealDone",
+  "templates": [
+    {
+      "id": "used_vehicle_gadget_sale",
+      "title_bn": "পুরাতন গাড়ি / পণ্য বিক্রয় চুক্তি",
+      "title_en": "Used Vehicle & Product Sale Agreement",
+      "category": "sales",
+      "icon": "motorcycle",
+      "fields": [
+        {"key": "seller_name", "label_bn": "বিক্রেতার নাম", "type": "text", "required": true},
+        {"key": "seller_nid", "label_bn": "বিক্রেতার NID নম্বর", "type": "nid", "required": true},
+        {"key": "seller_phone", "label_bn": "বিক্রেতার মোবাইল", "type": "phone", "required": true},
+        {"key": "buyer_name", "label_bn": "ক্রেতার নাম", "type": "text", "required": true},
+        {"key": "buyer_nid", "label_bn": "ক্রেতার NID নম্বর", "type": "nid", "required": true},
+        {"key": "buyer_phone", "label_bn": "ক্রেতার মোবাইল", "type": "phone", "required": true},
+        {"key": "item_description", "label_bn": "পণ্যের বিবরণ (মডেল/ব্র্যান্ড)", "type": "textarea", "required": true},
+        {"key": "identifier", "label_bn": "রেজিস্ট্রেশন / চেসিস / IMEI নম্বর", "type": "text", "required": true},
+        {"key": "total_price", "label_bn": "মোট বিক্রয়মূল্য (টাকা)", "type": "number", "required": true},
+        {"key": "advance_paid", "label_bn": "পরিশোধিত অর্থ (টাকা)", "type": "number", "required": true}
+      ],
+      "clauses_bn": [
+        "বিক্রেতা নিশ্চয়তা প্রদান করিতেছেন যে উল্লেখিত পণ্যটি তাহার সম্পূর্ণ নিজস্ব মালিকানাধীন এবং ইহা কোনো প্রকার চোরাই, ঋণগ্রস্ত বা আইনি বিরোধপূর্ণ নহে।",
+        "ক্রেতা পণ্যটি স্বচক্ষে দেখিয়া, পরীক্ষা-নিরীক্ষা করিয়া সন্তুষ্ট হইয়া চলন্ত অবস্থায় গ্রহণ করিলেন।",
+        "অদ্য তারিখের পর উল্লেখিত পণ্য সংক্রান্ত যেকোনো দায়-দায়িত্ব বা আইনি ব্যবহার ক্রেতার ওপর বর্তাইবে।"
+      ]
+    },
+    {
+      "id": "personal_loan_promissory",
+      "title_bn": "টাকা ধার ও পরিশোধের অঙ্গীকারনামা (করজে হাসানা)",
+      "title_en": "Personal Loan & Promissory Note",
+      "category": "finance",
+      "icon": "handshake",
+      "fields": [
+        {"key": "lender_name", "label_bn": "ঋণদাতার নাম", "type": "text", "required": true},
+        {"key": "lender_phone", "label_bn": "ঋণদাতার মোবাইল", "type": "phone", "required": true},
+        {"key": "borrower_name", "label_bn": "ঋণগ্রহীতার নাম", "type": "text", "required": true},
+        {"key": "borrower_nid", "label_bn": "ঋণগ্রহীতার NID নম্বর", "type": "nid", "required": true},
+        {"key": "borrower_phone", "label_bn": "ঋণগ্রহীতার মোবাইল", "type": "phone", "required": true},
+        {"key": "loan_amount", "label_bn": "ধারের পরিমাণ (টাকা)", "type": "number", "required": true},
+        {"key": "payment_mode", "label_bn": "লেনদেনের মাধ্যম (ক্যাশ/বিকাশ/ব্যাংক)", "type": "text", "required": true},
+        {"key": "due_date", "label_bn": "পরিশোধের শেষ তারিখ", "type": "date", "required": true}
+      ],
+      "clauses_bn": [
+        "ঋণগ্রহীতা স্বেচ্ছায়, সজ্ঞানে উল্লেখিত অর্থ করজে হাসানা (সুদমুক্ত ঋণ) হিসেবে বুঝিয়া গ্রহণ করিলেন।",
+        "ঋণগ্রহীতা অঙ্গীকার করিতেছেন যে তিনি উল্লেখিত শেষ তারিখের মধ্যে সম্পূর্ণ অর্থ ঋণদাতাকে পরিশোধ করিবেন।",
+        "উভয় পক্ষ এই স্মারকটি নিজ দায়িত্বে ও পূর্ণ সম্মতিতে সম্পাদন করিলেন।"
+      ]
+    },
+    {
+      "id": "rental_flat_advance",
+      "title_bn": "বাসাভাড়া বুকিং ও অগ্রিম বায়না রশিদ",
+      "title_en": "Rental Flat Booking & Advance Slip",
+      "category": "rental",
+      "icon": "home",
+      "fields": [
+        {"key": "landlord_name", "label_bn": "বাড়িওয়ালার নাম", "type": "text", "required": true},
+        {"key": "landlord_phone", "label_bn": "বাড়িওয়ালার মোবাইল", "type": "phone", "required": true},
+        {"key": "tenant_name", "label_bn": "ভাড়াটিয়ার নাম", "type": "text", "required": true},
+        {"key": "tenant_phone", "label_bn": "ভাড়াটিয়ার মোবাইল", "type": "phone", "required": true},
+        {"key": "flat_address", "label_bn": "ভাড়া দেওয়া ফ্ল্যাটের ঠিকানা", "type": "textarea", "required": true},
+        {"key": "monthly_rent", "label_bn": "নির্ধারিত মাসিক ভাড়া (টাকা)", "type": "number", "required": true},
+        {"key": "advance_amount", "label_bn": "অগ্রিম বা বায়নার টাকা", "type": "number", "required": true},
+        {"key": "move_in_date", "label_bn": "বাসায় ওঠার নির্ধারিত তারিখ", "type": "date", "required": true}
+      ],
+      "clauses_bn": [
+        "বাড়িওয়ালা উল্লেখিত ফ্ল্যাটটি ভাড়া দেওয়ার উদ্দেশ্যে ভাড়াটিয়ার নিকট হইতে অগ্রিম বায়নার টাকা বুঝিয়া পাইলেন।",
+        "উভয় পক্ষ নির্ধারিত তারিখে মূল ভাড়া চুক্তিপত্র সম্পাদন এবং বাসায় ওঠার ব্যাপারে একমত পোষণ করিলেন।",
+        "কোনো পক্ষ চুক্তি ভঙ্গ করিলে স্থানীয় রীতি অনুযায়ী নিষ্পত্তি করা হইবে।"
+      ]
+    },
+    {
+      "id": "service_contractor_advance",
+      "title_bn": "কাজের অগ্রিম ও সেবা চুক্তি",
+      "title_en": "Contractor & Service Advance",
+      "category": "services",
+      "icon": "tools",
+      "fields": [
+        {"key": "client_name", "label_bn": "গ্রাহকের নাম", "type": "text", "required": true},
+        {"key": "contractor_name", "label_bn": "কারিগর / সেবাদাতার নাম", "type": "text", "required": true},
+        {"key": "work_description", "label_bn": "কাজের বিবরণ ও শর্ত", "type": "textarea", "required": true},
+        {"key": "total_cost", "label_bn": "মোট চুক্তি মূল্য (টাকা)", "type": "number", "required": true},
+        {"key": "advance_paid", "label_bn": "অগ্রিম প্রদত্ত অর্থ (টাকা)", "type": "number", "required": true},
+        {"key": "deadline", "label_bn": "কাজ সমাপ্তির তারিখ", "type": "date", "required": true}
+      ],
+      "clauses_bn": [
+        "সেবাদাতা নির্ধারিত মানের কাজ উল্লেখিত সময়ের মধ্যে সম্পন্ন করিতে দায়বদ্ধ থাকিবেন।",
+        "কাজ সন্তোষজনকভাবে সম্পন্ন হওয়ার পর গ্রাহক অবশিষ্ট বকেয়া পরিশোধ করিবেন।"
+      ]
+    },
+    {
+      "id": "village_salish_aposhnama",
+      "title_bn": "গ্রাম্য সালিশ ও সর্বসম্মত আপোষনামা",
+      "title_en": "Village Arbitration & Dispute Settlement Record",
+      "category": "arbitration",
+      "icon": "gavel",
+      "fields": [
+        {"key": "dispute_category", "label_bn": "বিরোধের বিষয় (সীমানা/ক্ষতিপূরণ/পারিবারিক)", "type": "select", "options": ["সীমানা বিরোধ", "ফসল/সম্পত্তির ক্ষতিপূরণ", "পারিবারিক আপোষ", "টাকা লেনদেনের বিরোধ", "অন্যান্য"], "required": true},
+        {"key": "first_party_name", "label_bn": "বাদী পক্ষের নাম", "type": "text", "required": true},
+        {"key": "first_party_phone", "label_bn": "বাদী পক্ষের মোবাইল / NID", "type": "text", "required": true},
+        {"key": "second_party_name", "label_bn": "বিবাদী পক্ষের নাম", "type": "text", "required": true},
+        {"key": "second_party_phone", "label_bn": "বিবাদী পক্ষের মোবাইল / NID", "type": "text", "required": true},
+        {"key": "arbiter_1_name", "label_bn": "প্রধান সালিশদার / মুরুব্বি ১ (নাম ও পদবী)", "type": "text", "required": true},
+        {"key": "arbiter_2_name", "label_bn": "সালিশদার ২ (নাম ও মোবাইল)", "type": "text", "required": true},
+        {"key": "arbiter_3_name", "label_bn": "সালিশদার ৩ (নাম ও মোবাইল)", "type": "text", "required": false},
+        {"key": "settlement_details", "label_bn": "সালিশের সর্বসম্মত সিদ্ধান্ত ও শর্তাবলী", "type": "textarea", "required": true},
+        {"key": "compensation_amount", "label_bn": "ক্ষতিপূরণ বা নিষ্পত্তির অর্থ (যদি থাকে)", "type": "number", "required": false},
+        {"key": "has_audio_record", "label_bn": "মৌখিক রায়ের অডিও রেকর্ড সংযুক্ত", "type": "boolean", "required": false}
+      ],
+      "clauses_bn": [
+        "উভয় পক্ষ নিজ নিজ ইচ্ছায় ও স্বাধীন সম্মতিতে উপস্থিত গণ্যমান্য সালিশদার ও মুরুব্বিদের সিদ্ধান্ত মানিয়া লইলেন।",
+        "অদ্য তারিখের সিদ্ধান্তের মাধ্যমে উল্লেখিত বিরোধটির চূড়ান্ত ও সর্বসম্মত নিষ্পত্তি ঘটিল; ভবিষ্যতে এই বিষয়ে কোনো পক্ষ নতুন করিয়া কোনো মামলা, অভিযোগ বা বিরোধ সৃষ্টি করিবেন না।",
+        "উভয় পক্ষ এবং উপস্থিত সম্মানিত সালিশদারবৃন্দ সম্পূর্ণ সজ্ঞানে এই আপোষনামায় নিজ নিজ স্বাক্ষর ও টিপসই প্রদান করিলেন।"
+      ]
+    }
+  ]
+}
