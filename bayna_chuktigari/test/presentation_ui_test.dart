@@ -46,6 +46,19 @@ void main() {
       expect(find.text('পুরাতন গাড়ি / পণ্য বিক্রয় চুক্তি'), findsOneWidget);
       expect(find.text('মোঃ আব্দুল করিম ↔ তানভীর আহমেদ'), findsOneWidget);
       expect(find.text('টাকা: ৳145000'), findsOneWidget);
+      expect(find.text(AppStringsBn.viewPdfBtn), findsOneWidget);
+    });
+
+    testWidgets('Tapping view PDF button opens PdfPreviewScreen', (tester) async {
+      await tester.pumpWidget(BaynaChuktiApp(vaultRepository: mockVault));
+      await tester.pumpAndSettle();
+
+      final pdfBtn = find.text(AppStringsBn.viewPdfBtn);
+      expect(pdfBtn, findsOneWidget);
+      await tester.tap(pdfBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.text('ডিজিটাল চুক্তিপত্র ও রসিদ'), findsOneWidget);
     });
 
     testWidgets('Tapping FAB opens TemplateCatalogModal with templates', (tester) async {

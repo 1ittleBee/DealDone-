@@ -40,6 +40,7 @@ class AppStringsBn {
   static const String acceptSign = 'স্বাক্ষর গ্রহণ';
   static const String tipshoiBtn = 'টিপসই যুক্ত করুন';
   static const String addPhotoBtn = 'ছবি / রসিদ সংযুক্তি';
+  static const String viewPdfBtn = 'PDF দেখুন';
 
   // Verification & PDF
   static const String documentIdPrefix = 'স্মারক নং:';
