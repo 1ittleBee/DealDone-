@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings_bn.dart';
 import '../../../core/theme/app_theme.dart';
@@ -21,8 +22,11 @@ class PdfPreviewScreen extends StatelessWidget {
     required this.vaultRepository,
   });
 
-  void _shareViaWhatsApp(BuildContext context) {
+  Future<void> _shareViaWhatsApp(BuildContext context) async {
     final message = WhatsAppShareService.formatShareMessage(record);
+    final mobile = record.secondPartyMobile.isNotEmpty
+        ? record.secondPartyMobile
+        : record.firstPartyMobile;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -34,6 +38,16 @@ class PdfPreviewScreen extends StatelessWidget {
         duration: const Duration(seconds: 4),
       ),
     );
+
+    final uri = WhatsAppShareService.generateWhatsAppClickToChatUri(mobile, message);
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+    } catch (_) {
+      // SnackBar remains as fallback
+    }
   }
 
   @override

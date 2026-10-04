@@ -670,56 +670,18 @@ class _AgreementWizardScreenState extends State<AgreementWizardScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Direct Camera & Gallery Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _attachments.length < 3
-                          ? () => _pickEvidenceImage(ImageSource.camera)
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(AppColors.accentInt),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      icon: const Icon(Icons.camera_alt_outlined, size: 18),
-                      label: const Text(
-                        'ক্যামেরা',
-                        style: TextStyle(
-                          fontFamily: AppTheme.fontFamily,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _attachments.length < 3
-                          ? () => _pickEvidenceImage(ImageSource.gallery)
-                          : null,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      icon: const Icon(Icons.photo_library_outlined, size: 18),
-                      label: const Text(
-                        'গ্যালারি',
-                        style: TextStyle(
-                          fontFamily: AppTheme.fontFamily,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: _attachments.length < 3
                     ? _pickOrAddEvidenceAttachment
                     : null,
-                icon: const Icon(Icons.add_photo_alternate_outlined, size: 18),
-                label: const Text('ছবি তুলুন বা ফাইল যুক্ত করুন'),
+                icon: const Icon(Icons.add_photo_alternate_outlined, size: 20),
+                label: const Text(
+                  'ছবি তুলুন বা ফাইল যুক্ত করুন',
+                  style: TextStyle(
+                    fontFamily: AppTheme.fontFamily,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
