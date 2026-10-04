@@ -187,13 +187,16 @@ class PdfPreviewScreen extends StatelessWidget {
                                 children: [
                                   Icon(Icons.verified, size: 14, color: Color(AppColors.successInt)),
                                   SizedBox(width: 4),
-                                  Text(
-                                    'SHA-256 ডিজিটাল নিরাপত্তা সিলমোহর',
-                                    style: TextStyle(
-                                      fontFamily: AppTheme.fontFamily,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(AppColors.successInt),
+                                  Expanded(
+                                    child: Text(
+                                      'SHA-256 ডিজিটাল নিরাপত্তা সিলমোহর',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontFamily: AppTheme.fontFamily,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(AppColors.successInt),
+                                      ),
                                     ),
                                   ),
                                 ],

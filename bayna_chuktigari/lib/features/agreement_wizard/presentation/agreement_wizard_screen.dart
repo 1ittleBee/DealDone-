@@ -670,7 +670,8 @@ class _AgreementWizardScreenState extends State<AgreementWizardScreen> {
                             EvidenceAttachment(
                               id: 'att_${_attachments.length + 1}',
                               filePath: 'local://evidence_${DateTime.now().millisecondsSinceEpoch}.jpg',
-                              titleBn: 'রসিদ / প্রমাণের ছবি ${_attachments.length + 1}',
+                              titleBn:
+                                  'রসিদ / প্রমাণের ছবি ${BanglaDateFormatter.toBengaliDigits(_attachments.length + 1)}',
                               fileSizeBytes: 120 * 1024,
                               capturedAt: DateTime.now(),
                             ),

@@ -127,7 +127,7 @@ void main() {
         expect(find.byType(SignaturePadDialog), findsOneWidget);
 
         // Draw smooth vector stroke on canvas (generating >=15 stroke points)
-        final canvasFinder = find.byType(CustomPaint).last;
+        final canvasFinder = find.byKey(const Key('signature_canvas_gesture'));
         final gesture = await tester.startGesture(tester.getCenter(canvasFinder));
         for (int i = 0; i < 20; i++) {
           await gesture.moveBy(const Offset(4, 2));
@@ -174,7 +174,7 @@ void main() {
 
         // 9. Verify PDF Preview & Share Screen
         expect(find.byType(PdfPreviewScreen), findsOneWidget);
-        expect(find.text('ডিজিタル চুক্তিপত্র ও রসিদ'), findsOneWidget);
+        expect(find.text('ডিজিটাল চুক্তিপত্র ও রসিদ'), findsOneWidget);
 
         // Verify Sequential Document ID
         expect(find.textContaining('BC-2026-00001'), findsWidgets);
