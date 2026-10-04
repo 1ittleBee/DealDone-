@@ -222,6 +222,12 @@ class _AgreementWizardScreenState extends State<AgreementWizardScreen> {
       createdAt: DateTime.now(),
       pdfPath: 'local://documents/$docId.pdf',
       sha256Hash: sha256,
+      firstPartySignature: _p1Signature?.signerName,
+      firstPartyTipshoiPath: _p1Tipshoi?.imagePath,
+      firstPartyFinger: _p1Tipshoi?.finger.titleBn,
+      secondPartySignature: _p2Signature?.signerName,
+      secondPartyTipshoiPath: _p2Tipshoi?.imagePath,
+      secondPartyFinger: _p2Tipshoi?.finger.titleBn,
     );
 
     // Save to Vault

@@ -189,6 +189,7 @@ void main() {
         // Verify 1-Tap WhatsApp Share Trigger
         final whatsappShareBtn = find.widgetWithText(ElevatedButton, AppStringsBn.shareBtn);
         expect(whatsappShareBtn, findsOneWidget);
+        await tester.ensureVisible(whatsappShareBtn);
         await tester.tap(whatsappShareBtn);
         await tester.pump();
 
@@ -198,6 +199,7 @@ void main() {
 
         // 10. Return to Home Vault
         final returnHomeBtn = find.widgetWithText(OutlinedButton, 'সংরক্ষিত ভল্টে ফিরে যান');
+        await tester.ensureVisible(returnHomeBtn);
         await tester.tap(returnHomeBtn);
         await tester.pumpAndSettle();
 

@@ -16,6 +16,13 @@ class AgreementRecord {
   final String pdfPath;
   final String sha256Hash;
 
+  final String? firstPartySignature;
+  final String? firstPartyTipshoiPath;
+  final String? firstPartyFinger;
+  final String? secondPartySignature;
+  final String? secondPartyTipshoiPath;
+  final String? secondPartyFinger;
+
   const AgreementRecord({
     required this.documentId,
     required this.titleBn,
@@ -29,6 +36,12 @@ class AgreementRecord {
     required this.createdAt,
     required this.pdfPath,
     required this.sha256Hash,
+    this.firstPartySignature,
+    this.firstPartyTipshoiPath,
+    this.firstPartyFinger,
+    this.secondPartySignature,
+    this.secondPartyTipshoiPath,
+    this.secondPartyFinger,
   });
 
   /// Amount in formal Bengali legal words.
@@ -50,6 +63,12 @@ class AgreementRecord {
     DateTime? createdAt,
     String? pdfPath,
     String? sha256Hash,
+    String? firstPartySignature,
+    String? firstPartyTipshoiPath,
+    String? firstPartyFinger,
+    String? secondPartySignature,
+    String? secondPartyTipshoiPath,
+    String? secondPartyFinger,
   }) {
     return AgreementRecord(
       documentId: documentId ?? this.documentId,
@@ -64,6 +83,12 @@ class AgreementRecord {
       createdAt: createdAt ?? this.createdAt,
       pdfPath: pdfPath ?? this.pdfPath,
       sha256Hash: sha256Hash ?? this.sha256Hash,
+      firstPartySignature: firstPartySignature ?? this.firstPartySignature,
+      firstPartyTipshoiPath: firstPartyTipshoiPath ?? this.firstPartyTipshoiPath,
+      firstPartyFinger: firstPartyFinger ?? this.firstPartyFinger,
+      secondPartySignature: secondPartySignature ?? this.secondPartySignature,
+      secondPartyTipshoiPath: secondPartyTipshoiPath ?? this.secondPartyTipshoiPath,
+      secondPartyFinger: secondPartyFinger ?? this.secondPartyFinger,
     );
   }
 
@@ -80,6 +105,12 @@ class AgreementRecord {
         'createdAt': createdAt.toIso8601String(),
         'pdfPath': pdfPath,
         'sha256Hash': sha256Hash,
+        if (firstPartySignature != null) 'firstPartySignature': firstPartySignature,
+        if (firstPartyTipshoiPath != null) 'firstPartyTipshoiPath': firstPartyTipshoiPath,
+        if (firstPartyFinger != null) 'firstPartyFinger': firstPartyFinger,
+        if (secondPartySignature != null) 'secondPartySignature': secondPartySignature,
+        if (secondPartyTipshoiPath != null) 'secondPartyTipshoiPath': secondPartyTipshoiPath,
+        if (secondPartyFinger != null) 'secondPartyFinger': secondPartyFinger,
       };
 
   factory AgreementRecord.fromJson(Map<String, dynamic> json) => AgreementRecord(
@@ -95,5 +126,11 @@ class AgreementRecord {
         createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
         pdfPath: json['pdfPath'] as String? ?? '',
         sha256Hash: json['sha256Hash'] as String? ?? '',
+        firstPartySignature: json['firstPartySignature'] as String?,
+        firstPartyTipshoiPath: json['firstPartyTipshoiPath'] as String?,
+        firstPartyFinger: json['firstPartyFinger'] as String?,
+        secondPartySignature: json['secondPartySignature'] as String?,
+        secondPartyTipshoiPath: json['secondPartyTipshoiPath'] as String?,
+        secondPartyFinger: json['secondPartyFinger'] as String?,
       );
 }

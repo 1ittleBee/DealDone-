@@ -2,6 +2,7 @@ import 'package:test/test.dart';
 import 'package:bayna_chuktigari/features/agreement_wizard/domain/party_details.dart';
 import 'package:bayna_chuktigari/features/signatures/domain/digital_signature.dart';
 import 'package:bayna_chuktigari/features/signatures/domain/tipshoi_capture.dart';
+import 'package:bayna_chuktigari/features/vault/domain/agreement_record.dart';
 
 void main() {
   group('Story 4.2: Tipshoi (টিপসই) Physical Thumbprint Capture Tests', () {
@@ -112,6 +113,36 @@ void main() {
       expect(restored.hasAttestation, isTrue);
       expect(restored.tipshoi?.finger, equals(ThumbprintFinger.leftThumb));
       expect(restored.tipshoi?.base64Thumbnail, equals('base64ThumbnailDataThumb'));
+    });
+
+    test('AgreementRecord preserves Tipshoi thumbprint image path and finger specification', () {
+      final record = AgreementRecord(
+        documentId: 'DD-2026-00001',
+        titleBn: 'বায়না চুক্তি',
+        templateId: 'vehicle_sale',
+        firstPartyName: 'করিম সাহেব',
+        firstPartyMobile: '01711111111',
+        secondPartyName: 'রহিম সাহেব',
+        secondPartyMobile: '01822222222',
+        totalAmount: 50000,
+        dueAmount: 10000,
+        createdAt: DateTime(2026, 10, 4),
+        pdfPath: 'local://documents/DD-2026-00001.pdf',
+        sha256Hash: 'dummyhash123',
+        firstPartyTipshoiPath: '/data/user/0/tipshoi_p1.png',
+        firstPartyFinger: 'ডান বৃদ্ধাঙ্গুলি',
+        secondPartySignature: 'রহিম সাহেব',
+      );
+
+      final json = record.toJson();
+      expect(json['firstPartyTipshoiPath'], equals('/data/user/0/tipshoi_p1.png'));
+      expect(json['firstPartyFinger'], equals('ডান বৃদ্ধাঙ্গুলি'));
+      expect(json['secondPartySignature'], equals('রহিম সাহেব'));
+
+      final restored = AgreementRecord.fromJson(json);
+      expect(restored.firstPartyTipshoiPath, equals('/data/user/0/tipshoi_p1.png'));
+      expect(restored.firstPartyFinger, equals('ডান বৃদ্ধাঙ্গুলি'));
+      expect(restored.secondPartySignature, equals('রহিম সাহেব'));
     });
   });
 }

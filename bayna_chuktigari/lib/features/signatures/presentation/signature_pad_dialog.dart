@@ -1,4 +1,8 @@
+import 'dart:io';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:bayna_chuktigari/core/constants/app_colors.dart';
 import 'package:bayna_chuktigari/core/constants/app_strings_bn.dart';
 import 'package:bayna_chuktigari/core/theme/app_theme.dart';
@@ -11,7 +15,7 @@ enum SignaturePadMode { draw, type, tipshoi }
 /// Modal bottom sheet / dialog providing 3 signature options:
 /// 1. Smooth Bezier finger drawing with friction smoothing
 /// 2. Type-to-Sign (DocuSign style cursive auto-signature)
-/// 3. Physical Tipshoi (thumbprint) capture
+/// 3. Physical Tipshoi (thumbprint) capture with 1:1 permanent crop
 class SignaturePadDialog extends StatefulWidget {
   final String partyName;
   final String roleLabel;
@@ -50,6 +54,8 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
   SignaturePadMode _mode = SignaturePadMode.draw;
   String _selectedFinger = 'ডান বৃদ্ধাঙ্গুলি (Right Thumb)';
   late final TextEditingController _typedNameController;
+  String? _tipshoiImagePath;
+  bool _isProcessingTipshoi = false;
 
   @override
   void initState() {
@@ -83,18 +89,95 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
     });
   }
 
+  Future<void> _pickTipshoiImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: source,
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageQuality: 92,
+      );
+      if (pickedFile == null) return;
+
+      setState(() => _isProcessingTipshoi = true);
+
+      // Permanently crop the image to a standardized 1:1 square
+      final croppedPath = await _cropToSquare(pickedFile.path);
+
+      if (mounted) {
+        setState(() {
+          _tipshoiImagePath = croppedPath;
+          _isProcessingTipshoi = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isProcessingTipshoi = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(AppColors.dangerInt),
+            content: Text(
+              'ছবি আপলোডে সমস্যা হয়েছে: $e',
+              style: const TextStyle(fontFamily: AppTheme.fontFamily),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  static Future<String> _cropToSquare(String inputPath) async {
+    final file = File(inputPath);
+    final bytes = await file.readAsBytes();
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    final image = frame.image;
+
+    // Calculate center 1:1 square coordinates
+    final side = math.min(image.width, image.height).toDouble();
+    final srcX = (image.width - side) / 2.0;
+    final srcY = (image.height - side) / 2.0;
+
+    const targetSize = 400.0;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, targetSize, targetSize));
+    final srcRect = Rect.fromLTWH(srcX, srcY, side, side);
+    const dstRect = Rect.fromLTWH(0, 0, targetSize, targetSize);
+
+    final paint = Paint()
+      ..isAntiAlias = true
+      ..filterQuality = FilterQuality.high;
+
+    canvas.drawImageRect(image, srcRect, dstRect, paint);
+    final picture = recorder.endRecording();
+    final cropped = await picture.toImage(targetSize.toInt(), targetSize.toInt());
+    final byteData = await cropped.toByteData(format: ui.ImageByteFormat.png);
+
+    final tempDir = Directory.systemTemp;
+    final outputPath = '${tempDir.path}/tipshoi_${DateTime.now().millisecondsSinceEpoch}.png';
+    final outputFile = File(outputPath);
+    await outputFile.writeAsBytes(byteData!.buffer.asUint8List());
+
+    return outputPath;
+  }
+
   void _saveSignature() {
     final role = widget.roleLabel.contains('প্রথম') ? PartyRole.firstParty : PartyRole.secondParty;
 
     if (_mode == SignaturePadMode.tipshoi) {
+      final imagePath = _tipshoiImagePath ??
+          'local://tipshoi_${DateTime.now().millisecondsSinceEpoch}.png';
       final tipshoi = TipshoiCapture(
         id: 'tip_${DateTime.now().millisecondsSinceEpoch}',
         signerName: widget.partyName,
         role: role,
         finger: _selectedFinger.contains('ডান')
             ? ThumbprintFinger.rightThumb
-            : ThumbprintFinger.leftThumb,
-        imagePath: 'local://tipshoi_${DateTime.now().millisecondsSinceEpoch}.png',
+            : (_selectedFinger.contains('বাম')
+                ? ThumbprintFinger.leftThumb
+                : ThumbprintFinger.other),
+        imagePath: imagePath,
         capturedAt: DateTime.now(),
       );
       widget.onSaved(null, tipshoi);
@@ -155,9 +238,10 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
         padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Header
             Row(
@@ -595,63 +679,276 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
                 ),
               ),
             ] else ...[
-              // Tipshoi Capture Card
+              // Tipshoi Capture & Permanent Crop Section
               Container(
-                height: 220,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: const Color(AppColors.borderStrongInt)),
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                 ),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      width: 68,
-                      height: 68,
-                      decoration: BoxDecoration(
-                        color: const Color(AppColors.accentGoldInt).withOpacity(0.12),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(AppColors.accentGoldInt),
-                          width: 2,
+                    // Finger Selector Dropdown
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.fingerprint,
+                          size: 20,
+                          color: Color(AppColors.accentGoldInt),
                         ),
-                      ),
-                      child: const Icon(
-                        Icons.fingerprint,
-                        size: 42,
-                        color: Color(AppColors.accentGoldInt),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    DropdownButton<String>(
-                      value: _selectedFinger,
-                      isExpanded: true,
-                      underline: const SizedBox(),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'ডান বৃদ্ধাঙ্গুলি (Right Thumb)',
-                          child: Text('ডান হাতের বৃদ্ধাঙ্গুলির টিপসই'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'বাম বৃদ্ধাঙ্গুলি (Left Thumb)',
-                          child: Text('বাম হাতের বৃদ্ধাঙ্গুলির টিপসই'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'তর্জনী (Index Finger)',
-                          child: Text('হাতের তর্জনী আঙুল'),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _selectedFinger,
+                              isDense: true,
+                              isExpanded: true,
+                              style: const TextStyle(
+                                fontFamily: AppTheme.fontFamily,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Color(AppColors.inkPrimaryInt),
+                              ),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: 'ডান বৃদ্ধাঙ্গুলি (Right Thumb)',
+                                  child: Text('ডান হাতের বৃদ্ধাঙ্গুলির টিপসই'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'বাম বৃদ্ধাঙ্গুলি (Left Thumb)',
+                                  child: Text('বাম হাতের বৃদ্ধাঙ্গুলির টিপসই'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'তর্জনী (Index Finger)',
+                                  child: Text('হাতের তর্জনী আঙুল'),
+                                ),
+                              ],
+                              onChanged: (val) {
+                                if (val != null) setState(() => _selectedFinger = val);
+                              },
+                            ),
+                          ),
                         ),
                       ],
-                      onChanged: (val) {
-                        if (val != null) setState(() => _selectedFinger = val);
-                      },
                     ),
+                    const Divider(height: 14),
+
+                    // PERMANENT CROP SECTION (Standardized 1:1 Square Box)
+                    Center(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Base 1:1 Square Frame
+                          Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              color: const Color(AppColors.surfaceOverlayInt).withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                              border: Border.all(
+                                color: const Color(AppColors.accentGoldInt),
+                                width: 2,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(AppTheme.radiusSm - 1),
+                              child: _isProcessingTipshoi
+                                  ? const Center(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          CircularProgressIndicator(strokeWidth: 2),
+                                          SizedBox(height: 8),
+                                          Text(
+                                            'ক্রপ ও প্রসেসিং হচ্ছে...',
+                                            style: TextStyle(
+                                              fontFamily: AppTheme.fontFamily,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : (_tipshoiImagePath != null
+                                      ? Image.file(
+                                          File(_tipshoiImagePath!),
+                                          width: 150,
+                                          height: 150,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Center(
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.fingerprint,
+                                                size: 52,
+                                                color: const Color(AppColors.accentGoldInt)
+                                                    .withOpacity(0.45),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              const Text(
+                                                'স্থায়ী ক্রপ সেকশন\n(১:১ স্ট্যান্ডার্ড মাপ)',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontFamily: AppTheme.fontFamily,
+                                                  fontSize: 10,
+                                                  color: Color(AppColors.inkSecondaryInt),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )),
+                            ),
+                          ),
+
+                          // Permanent Viewfinder Corner Reticles
+                          const SizedBox(
+                            width: 150,
+                            height: 150,
+                            child: CustomPaint(
+                              painter: _CropCornerReticlePainter(),
+                            ),
+                          ),
+
+                          // Crop Success Badge
+                          if (_tipshoiImagePath != null && !_isProcessingTipshoi)
+                            Positioned(
+                              bottom: 6,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.75),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.check_circle, size: 11, color: Color(AppColors.successInt)),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '১:১ ক্রপ সম্পন্ন (400×400)',
+                                      style: TextStyle(
+                                        fontFamily: AppTheme.fontFamily,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // Upload Action Buttons
+                    if (_tipshoiImagePath == null)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: _isProcessingTipshoi
+                                  ? null
+                                  : () => _pickTipshoiImage(ImageSource.camera),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(AppColors.accentInt),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              icon: const Icon(Icons.camera_alt_outlined, size: 16),
+                              label: const Text(
+                                'ক্যামেরা',
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _isProcessingTipshoi
+                                  ? null
+                                  : () => _pickTipshoiImage(ImageSource.gallery),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                              icon: const Icon(Icons.photo_library_outlined, size: 16),
+                              label: const Text(
+                                'ছবি আপলোড',
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _isProcessingTipshoi
+                                  ? null
+                                  : () => _pickTipshoiImage(ImageSource.camera),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                              ),
+                              icon: const Icon(Icons.refresh, size: 15),
+                              label: const Text(
+                                'পুনরায় তুলুন',
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: _isProcessingTipshoi
+                                  ? null
+                                  : () => _pickTipshoiImage(ImageSource.gallery),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                              ),
+                              icon: const Icon(Icons.photo_library_outlined, size: 15),
+                              label: const Text(
+                                'গ্যালারি',
+                                style: TextStyle(
+                                  fontFamily: AppTheme.fontFamily,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          IconButton(
+                            onPressed: () => setState(() => _tipshoiImagePath = null),
+                            icon: const Icon(Icons.delete_outline, size: 18, color: Color(AppColors.dangerInt)),
+                            tooltip: 'মুছুন',
+                          ),
+                        ],
+                      ),
+
+                    const SizedBox(height: 6),
                     const Text(
-                      'টিপসই দেওয়ার জন্য নীল/কালো কালির ছাপ ক্যামেরায় ধারণ হবে',
+                      'টিপসই এর ছবি ফ্রেমের মাঝে বর্গাকারে স্বয়ংক্রিয়ভাবে ক্রপ হয়ে ডকুমেন্টে যুক্ত হবে',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: AppTheme.fontFamily,
-                        fontSize: 11,
+                        fontSize: 10,
                         color: Color(AppColors.inkSecondaryInt),
                       ),
                     ),
@@ -686,7 +983,8 @@ class _SignaturePadDialogState extends State<SignaturePadDialog> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
@@ -750,4 +1048,53 @@ class _SignaturePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SignaturePainter oldDelegate) => true;
+}
+
+/// Paints L-shaped camera reticles on 4 corners of the permanent crop section
+class _CropCornerReticlePainter extends CustomPainter {
+  const _CropCornerReticlePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(AppColors.accentGoldInt)
+      ..strokeWidth = 3.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.square;
+
+    const cornerLength = 16.0;
+
+    // Top-Left
+    canvas.drawLine(const Offset(0, 0), const Offset(cornerLength, 0), paint);
+    canvas.drawLine(const Offset(0, 0), const Offset(0, cornerLength), paint);
+
+    // Top-Right
+    canvas.drawLine(Offset(size.width, 0), Offset(size.width - cornerLength, 0), paint);
+    canvas.drawLine(Offset(size.width, 0), Offset(size.width, cornerLength), paint);
+
+    // Bottom-Left
+    canvas.drawLine(Offset(0, size.height), Offset(cornerLength, size.height), paint);
+    canvas.drawLine(Offset(0, size.height), Offset(0, size.height - cornerLength), paint);
+
+    // Bottom-Right
+    canvas.drawLine(Offset(size.width, size.height), Offset(size.width - cornerLength, size.height), paint);
+    canvas.drawLine(Offset(size.width, size.height), Offset(size.width, size.height - cornerLength), paint);
+
+    // Subtle rule of thirds dashed grid
+    final gridPaint = Paint()
+      ..color = const Color(AppColors.accentGoldInt).withOpacity(0.25)
+      ..strokeWidth = 0.8
+      ..style = PaintingStyle.stroke;
+
+    final thirdW = size.width / 3.0;
+    final thirdH = size.height / 3.0;
+
+    canvas.drawLine(Offset(thirdW, 0), Offset(thirdW, size.height), gridPaint);
+    canvas.drawLine(Offset(thirdW * 2, 0), Offset(thirdW * 2, size.height), gridPaint);
+    canvas.drawLine(Offset(0, thirdH), Offset(size.width, thirdH), gridPaint);
+    canvas.drawLine(Offset(0, thirdH * 2), Offset(size.width, thirdH * 2), gridPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

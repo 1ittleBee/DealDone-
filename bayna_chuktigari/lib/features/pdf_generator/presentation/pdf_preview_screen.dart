@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings_bn.dart';
@@ -152,6 +153,40 @@ class PdfPreviewScreen extends StatelessWidget {
                       ),
                     ),
 
+                  const SizedBox(height: 16),
+
+                  // Section 4: Signatures & Tipshoi Section
+                  _buildSectionHeader('৪. পক্ষগণের স্বাক্ষর ও টিপসই'),
+                  const SizedBox(height: 10),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1st Party Attestation Box
+                      Expanded(
+                        child: _buildPartyAttestationBox(
+                          roleLabel: 'প্রথম পক্ষ',
+                          name: record.firstPartyName,
+                          mobile: record.firstPartyMobile,
+                          signature: record.firstPartySignature,
+                          tipshoiPath: record.firstPartyTipshoiPath,
+                          fingerLabel: record.firstPartyFinger,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // 2nd Party Attestation Box
+                      Expanded(
+                        child: _buildPartyAttestationBox(
+                          roleLabel: 'দ্বিতীয় পক্ষ',
+                          name: record.secondPartyName,
+                          mobile: record.secondPartyMobile,
+                          signature: record.secondPartySignature,
+                          tipshoiPath: record.secondPartyTipshoiPath,
+                          fingerLabel: record.secondPartyFinger,
+                        ),
+                      ),
+                    ],
+                  ),
+
                   const SizedBox(height: 20),
 
                   // Attestation & Integrity Seal
@@ -305,6 +340,174 @@ class PdfPreviewScreen extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPartyAttestationBox({
+    required String roleLabel,
+    required String name,
+    required String mobile,
+    String? signature,
+    String? tipshoiPath,
+    String? fingerLabel,
+  }) {
+    final hasRealFile = tipshoiPath != null &&
+        tipshoiPath.isNotEmpty &&
+        !tipshoiPath.startsWith('local://') &&
+        File(tipshoiPath).existsSync();
+    final isMockTipshoi = tipshoiPath != null && tipshoiPath.isNotEmpty && !hasRealFile;
+    final hasSignature = signature != null && signature.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(AppColors.surfaceRaisedInt),
+        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+        border: Border.all(color: const Color(AppColors.borderHairlineInt)),
+      ),
+      child: Column(
+        children: [
+          // Thumbprint / Signature Stamp Area
+          Container(
+            width: 84,
+            height: 84,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+              border: Border.all(
+                color: (hasRealFile || isMockTipshoi)
+                    ? const Color(AppColors.accentGoldInt)
+                    : const Color(AppColors.borderStrongInt),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(AppTheme.radiusSm - 1),
+              child: hasRealFile
+                  ? Image.file(
+                      File(tipshoiPath),
+                      width: 84,
+                      height: 84,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => const Center(
+                        child: Icon(Icons.fingerprint, size: 48, color: Color(AppColors.accentGoldInt)),
+                      ),
+                    )
+                  : (isMockTipshoi
+                      ? const Center(
+                          child: Icon(Icons.fingerprint, size: 50, color: Color(AppColors.accentGoldInt)),
+                        )
+                      : (hasSignature
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: Text(
+                                  signature,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: AppTheme.fontFamily,
+                                    fontSize: 15,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(AppColors.accentInt),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 50,
+                                    height: 1,
+                                    color: const Color(AppColors.borderStrongInt),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'স্বাক্ষর',
+                                    style: TextStyle(
+                                      fontFamily: AppTheme.fontFamily,
+                                      fontSize: 10,
+                                      color: Color(AppColors.inkSecondaryInt),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ))),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontFamily: AppTheme.fontFamily,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Color(AppColors.inkPrimaryInt),
+            ),
+          ),
+          Text(
+            roleLabel,
+            style: const TextStyle(
+              fontFamily: AppTheme.fontFamily,
+              fontSize: 10,
+              color: Color(AppColors.inkSecondaryInt),
+            ),
+          ),
+          if (hasRealFile || isMockTipshoi)
+            Container(
+              margin: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(AppColors.accentGoldInt).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: const Color(AppColors.accentGoldInt), width: 0.5),
+              ),
+              child: Text(
+                'টিপসই: ${fingerLabel ?? 'বৃদ্ধাঙ্গুলি'}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: Color(AppColors.accentGoldInt),
+                ),
+              ),
+            )
+          else if (hasSignature)
+            Container(
+              margin: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: const Color(AppColors.successInt).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: const Color(AppColors.successInt), width: 0.5),
+              ),
+              child: const Text(
+                '✓ ডিজিটাল স্বাক্ষর',
+                style: TextStyle(
+                  fontFamily: AppTheme.fontFamily,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w600,
+                  color: Color(AppColors.successInt),
+                ),
+              ),
+            ),
         ],
       ),
     );
